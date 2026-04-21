@@ -11,14 +11,8 @@
         .screen { display: none; height: 100vh; width: 100vw; flex-direction: column; justify-content: center; align-items: center; }
         .active { display: flex; }
         .btn { padding: 15px 30px; margin: 10px; font-size: 18px; border: none; border-radius: 10px; cursor: pointer; background: #ff1a8c; color: white; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
-        
-        /* 2x2 Grid Layout */
         .grid { display: grid; grid-template-columns: auto auto; gap: 25px; justify-content: center; z-index: 10; position: relative; margin: 0 auto; }
-        
-        /* Giant Icons */
         .icon { width: 130px; height: 130px; background: #ff69b4; border-radius: 25px; display: flex; align-items: center; justify-content: center; font-size: 65px; cursor: pointer; transition: transform 0.3s, opacity 0.3s; box-shadow: 0 6px 10px rgba(0,0,0,0.15); color: white; z-index: 10; position: relative; }
-        
-        /* Shaking Present Box */
         #starting-present { font-size: 100px; cursor: pointer; animation: intenseShake 1.5s infinite; z-index: 50; }
         
         /* Lock States and Animations */
@@ -33,7 +27,7 @@
         .back-btn { position: absolute; top: 20px; left: 20px; background: rgba(255, 255, 255, 0.2); border: 2px solid white; color: white; border-radius: 20px; padding: 8px 15px; font-size: 16px; cursor: pointer; z-index: 300; font-weight: bold; backdrop-filter: blur(5px); }
         .back-btn:hover { background: rgba(255, 255, 255, 0.4); }
 
-        /* --- OPTION 1: 10-Picture Bouquet --- */
+        /* --- OPTION 1: Bouquet Specifics --- */
         .bouquet-cluster { display: flex; flex-wrap: wrap; justify-content: center; width: 350px; position: relative; z-index: 2; padding: 10px; margin-bottom: -15px;}
         .flower-pic { width: 100px; height: 100px; background: #fff; border: 4px solid white; box-shadow: 0 3px 6px rgba(0,0,0,0.5); margin: -10px; border-radius: 12px; background-size: cover; background-position: center; }
         .stem-container { width: 20px; height: 80px; background: #228B22; margin: 0 auto; border-radius: 0 0 10px 10px; position: relative; z-index: 1; display: flex; justify-content: center; align-items: center; box-shadow: inset 3px 0 6px rgba(0,0,0,0.2); }
@@ -175,7 +169,7 @@
                 
                 <p>Happy Birthday, my beautiful girl! As you read this, having unlocked all the surprises I put together, I hope you have the biggest smile on your face.</p>
                 
-                <p>I wanted to do something completely different for you this year. Anyone can just buy a card, but I wanted to build a private digital world just for you. Every line of code, every minion popping out of a door, and every floating balloon was made to celebrate you. Applying what I’m learning in my ICT program at Victoria University just to create this for your birthday has easily been my favorite project I’ve ever worked on.</p>
+                <p>I wanted to do something completely different for you this year. Anyone can just buy a card, but I wanted to build a private digital world just for you. Every line of code, every minion popping out of a door, and every floating banana was made to celebrate you. Applying what I’m learning in my ICT program at Victoria University just to create this for your birthday has easily been my favorite project I’ve ever worked on.</p>
                 
                 <p>Alicia, from the moment you came into my life, everything just got brighter. You have this effortless ability to make the ordinary feel extraordinary. Looking at the pictures you just clicked through in the album, I don't just see photos—I see a timeline of us growing closer and falling deeper in love. You are not just my girlfriend; you are my best friend, my safest place, and my greatest adventure all wrapped into one.</p>
                 
@@ -216,7 +210,6 @@
     <script>
         let unlocked = { 1: true, 2: false, 3: false, 4: false }; 
         let viewed = { 1: false, 2: false, 3: false, 4: false };   
-        
         let bananasCollected = 0;
 
         function openInitialPresent() {
@@ -375,4 +368,103 @@
                     }, 600); 
                 }
                 if (viewed[1] && viewed[2] && viewed[3] && viewed[4]) {
-                    let fifth = document.getElementById('fifth-icon
+                    let fifth = document.getElementById('fifth-icon');
+                    fifth.style.display = 'flex';
+                    fifth.classList.add('slide-up-anim');
+                    setTimeout(() => {
+                        fifth.classList.remove('slide-up-anim');
+                        fifth.classList.add('shaking-option');
+                    }, 800);
+                }
+            }, 100); 
+        }
+
+        function startBananaGame() {
+            document.getElementById('screen2').classList.remove('active');
+            document.getElementById('screen3').classList.add('active');
+            spawnBananas();
+        }
+
+        function spawnBananas() {
+            let gameArea = document.getElementById('screen3');
+            let interval = setInterval(() => {
+                if (bananasCollected >= 19) {
+                    clearInterval(interval);
+                    return;
+                }
+                let banana = document.createElement('div');
+                banana.className = 'banana';
+                banana.innerText = '🍌';
+                banana.style.left = Math.random() * 80 + 'vw';
+                banana.onclick = function() {
+                    this.remove();
+                    bananasCollected++;
+                    buildCake();
+                    if (bananasCollected === 19) setTimeout(startFinale, 1500);
+                };
+                gameArea.appendChild(banana);
+            }, 800);
+        }
+
+        function buildCake() {
+            let cakeDiv = document.getElementById('cake-container');
+            let piece = document.createElement('div');
+            piece.className = 'cake-piece';
+            piece.style.height = (100 / 19) + '%';
+            cakeDiv.appendChild(piece);
+        }
+
+        function startFinale() {
+            document.getElementById('screen3').classList.remove('active');
+            document.getElementById('screen4').classList.add('active');
+            listenToMicrophone();
+        }
+
+        async function listenToMicrophone() {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                const analyzer = audioContext.createAnalyser();
+                const microphone = audioContext.createMediaStreamSource(stream);
+                microphone.connect(analyzer);
+                analyzer.fftSize = 256;
+                const bufferLength = analyzer.frequencyBinCount;
+                const dataArray = new Uint8Array(bufferLength);
+                function checkVolume() {
+                    analyzer.getByteFrequencyData(dataArray);
+                    let sum = 0;
+                    for(let i = 0; i < bufferLength; i++) { sum += dataArray[i]; }
+                    let average = sum / bufferLength;
+                    if (average > 80) { 
+                        triggerWin();
+                        stream.getTracks().forEach(track => track.stop()); 
+                    } else {
+                        requestAnimationFrame(checkVolume);
+                    }
+                }
+                checkVolume();
+            } catch (err) {
+                alert("Please allow microphone access so you can blow out the candles!");
+            }
+        }
+
+        function triggerWin() {
+            document.getElementById('mic-instruction').style.display = 'none'; 
+            document.getElementById('finale-text').style.display = 'block';
+            document.getElementById('signature').style.display = 'block';
+            let flames = document.querySelectorAll('.flame');
+            flames.forEach(f => f.style.display = 'none');
+            let duration = 30 * 1000;
+            let animationEnd = Date.now() + duration;
+            (function frame() {
+                let timeLeft = animationEnd - Date.now();
+                if (timeLeft <= 0) return; 
+                confetti({ particleCount: 5, angle: 60, spread: 55, origin: { x: 0 }, colors: ['#ff1a8c', '#ff66b2', '#ffffff'] });
+                confetti({ particleCount: 5, angle: 120, spread: 55, origin: { x: 1 }, colors: ['#ff1a8c', '#ff66b2', '#ffffff'] });
+                requestAnimationFrame(frame);
+            }());
+            triggerHeart();
+        }
+    </script>
+</body>
+</html>
