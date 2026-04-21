@@ -6,61 +6,284 @@
     <title>Happy Birthday Alicia!</title>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <style>
-        body { font-family: 'Arial', sans-serif; text-align: center; background: #ffb6c1; margin: 0; overflow: hidden; }
-        .screen { display: none; height: 100vh; width: 100vw; flex-direction: column; justify-content: center; align-items: center; position: relative; }
-        .active { display: flex; }
-        .btn { padding: 15px 30px; margin: 10px; font-size: 18px; border: none; border-radius: 10px; cursor: pointer; background: #ff1a8c; color: white; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
-        
+        /* Base Styling */
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background: #ffb6c1;
+            margin: 0;
+            overflow: hidden;
+        }
+
+        .screen {
+            display: none;
+            height: 100vh;
+            width: 100vw;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .active {
+            display: flex;
+        }
+
+        .btn {
+            padding: 15px 30px;
+            margin: 10px;
+            font-size: 18px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            background: #ff1a8c;
+            color: white;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
         /* Dashboard Icons */
-        .grid { display: grid; grid-template-columns: auto auto; gap: 25px; justify-content: center; z-index: 10; }
-        .icon { width: 120px; height: 120px; background: #ff69b4; border-radius: 25px; display: flex; align-items: center; justify-content: center; font-size: 60px; cursor: pointer; transition: transform 0.3s; box-shadow: 0 6px 10px rgba(0,0,0,0.15); color: white; }
-        .locked { opacity: 0.4; filter: grayscale(100%); cursor: not-allowed; pointer-events: none; }
-        .viewed { opacity: 0.8; transform: scale(0.9); }
-        #starting-present { font-size: 100px; cursor: pointer; animation: intenseShake 1.5s infinite; }
+        .grid {
+            display: grid;
+            grid-template-columns: auto auto;
+            gap: 25px;
+            justify-content: center;
+            z-index: 10;
+            position: relative;
+        }
 
-        /* Modals */
-        .option-modal { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.9); z-index: 200; flex-direction: column; justify-content: center; align-items: center; color: white; }
-        .back-btn { position: absolute; top: 20px; left: 20px; background: rgba(255, 255, 255, 0.2); border: 2px solid white; color: white; border-radius: 20px; padding: 8px 15px; cursor: pointer; z-index: 300; }
+        .icon {
+            width: 130px;
+            height: 130px;
+            background: #ff69b4;
+            border-radius: 25px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 65px;
+            cursor: pointer;
+            transition: transform 0.3s;
+            box-shadow: 0 6px 10px rgba(0,0,0,0.15);
+            color: white;
+        }
 
-        /* Bouquet & Letter */
-        .flower-pic { width: 100px; height: 100px; background: #fff; border: 4px solid white; margin: -10px; border-radius: 12px; background-size: cover; }
-        .letter-paper { background: #fff; width: 85%; max-width: 450px; height: 60vh; border-radius: 15px; padding: 20px; color: #cc0066; text-align: left; overflow-y: auto; position: relative; box-shadow: 0 10px 20px rgba(0,0,0,0.3); }
+        .locked {
+            opacity: 0.4;
+            filter: grayscale(100%);
+            cursor: not-allowed;
+            pointer-events: none;
+        }
 
-        /* Banana Mini-Game */
-        #game-ui { position: absolute; bottom: 20px; width: 100%; display: flex; flex-direction: column; align-items: center; }
-        .basket-container { position: relative; width: 150px; height: 150px; }
-        .minion-player { width: 80px; position: absolute; bottom: 40px; left: 35px; z-index: 1; }
-        .basket { width: 120px; position: absolute; bottom: 0; left: 15px; z-index: 2; }
-        .banana { position: absolute; font-size: 50px; cursor: pointer; z-index: 10; transition: transform 0.6s cubic-bezier(0.5, -0.5, 0.5, 1.5), opacity 0.3s; }
-        #thanks-msg { display: none; font-size: 40px; color: #ff1a8c; font-weight: bold; margin-top: 20px; animation: fadeIn 1s; }
+        .viewed {
+            transform: scale(0.95);
+            opacity: 0.8;
+        }
 
-        /* Realistic Cake */
-        .cake { position: relative; width: 200px; height: 150px; margin-top: 50px; }
-        .layer { position: absolute; left: 50%; transform: translateX(-50%); border-radius: 10px 10px 0 0; background: #ff66b2; border-bottom: 4px solid #cc0066; }
-        .layer::after { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 15px; background: rgba(255,255,255,0.5); border-radius: 10px 10px 0 0; }
-        .layer-bottom { width: 200px; height: 60px; bottom: 0; z-index: 1; }
-        .layer-middle { width: 150px; height: 50px; bottom: 60px; z-index: 2; }
-        .layer-top { width: 100px; height: 40px; bottom: 110px; z-index: 3; }
-        .candle { width: 10px; height: 35px; background: #fff; position: absolute; top: -35px; left: 50%; transform: translateX(-50%); border-radius: 2px; }
-        .flame { width: 12px; height: 18px; background: orange; border-radius: 50%; position: absolute; top: -18px; left: -1px; animation: flicker 0.1s infinite alternate; }
+        #starting-present {
+            font-size: 100px;
+            cursor: pointer;
+            animation: intenseShake 1.5s infinite;
+            z-index: 50;
+        }
+
+        /* Full-Screen Option Modals */
+        .option-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0,0,0,0.9);
+            z-index: 200;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: white;
+        }
+
+        .back-btn {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(255, 255, 255, 0.2);
+            border: 2px solid white;
+            color: white;
+            border-radius: 20px;
+            padding: 8px 15px;
+            font-size: 16px;
+            cursor: pointer;
+            z-index: 300;
+        }
+
+        /* Bouquet Photos */
+        .bouquet-cluster {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            width: 350px;
+        }
+
+        .flower-pic {
+            width: 100px;
+            height: 100px;
+            background: #fff;
+            border: 4px solid white;
+            margin: -10px;
+            border-radius: 12px;
+            background-size: cover;
+            background-position: center;
+        }
+
+        /* 3D Photo Album Book */
+        .book-wrapper {
+            perspective: 1200px;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+        }
+
+        .book {
+            width: 160px;
+            height: 240px;
+            position: relative;
+            transform-style: preserve-3d;
+            transition: transform 0.6s;
+        }
+
+        .page {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
+            transform-origin: left center;
+            transition: transform 0.8s cubic-bezier(0.645, 0.045, 0.355, 1);
+            transform-style: preserve-3d;
+            background: white;
+            border-radius: 2px 10px 10px 2px;
+            cursor: pointer;
+        }
+
+        .page.turned {
+            transform: rotateY(-180deg);
+        }
+
+        .page-front,
+        .page-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            border-radius: 2px 10px 10px 2px;
+            overflow: hidden;
+        }
+
+        .page-back {
+            transform: rotateY(180deg);
+            background: #fdfdfd;
+        }
+
+        .page-front img {
+            width: 90%;
+            height: 85%;
+            object-fit: cover;
+            margin: 5% auto;
+            display: block;
+            border-radius: 4px;
+        }
+
+        /* Letter Styling */
+        .letter-paper {
+            background: #fff;
+            width: 85%;
+            max-width: 450px;
+            height: 65vh;
+            border-radius: 15px;
+            padding: 20px;
+            color: #cc0066;
+            overflow-y: auto;
+            text-align: left;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+        }
 
         /* Minion Companion */
-        #companion-area { position: fixed; bottom: 0; left: 10px; z-index: 100; display: none; align-items: flex-end; height: 120px; }
-        #door { width: 60px; height: 90px; background: #8B4513; border-radius: 10px 10px 0 0; position: absolute; bottom: 0; left: 0; transform-origin: left; transition: transform 0.6s; z-index: 3; }
-        #minion-companion { width: 50px; position: absolute; left: 5px; bottom: 0; z-index: 2; transition: transform 0.4s; }
-        #speech-bubble { background: white; border-radius: 15px; padding: 8px; position: absolute; bottom: 100px; left: 60px; font-weight: bold; color: #ff1a8c; opacity: 0; transition: opacity 0.3s; width: 120px; font-size: 14px; }
+        #companion-area {
+            position: fixed;
+            bottom: 0;
+            left: 10px;
+            z-index: 100;
+            display: none;
+            align-items: flex-end;
+            height: 120px;
+        }
 
-        @keyframes intenseShake { 0%, 100% { transform: rotate(0); } 25% { transform: rotate(10deg) scale(1.1); } 75% { transform: rotate(-10deg) scale(1.1); } }
-        @keyframes flicker { from { opacity: 0.8; transform: scale(1); } to { opacity: 1; transform: scale(1.1); } }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        #door {
+            width: 60px;
+            height: 90px;
+            background: #8B4513;
+            border-radius: 10px 10px 0 0;
+            transform-origin: left;
+            transition: transform 0.6s;
+            z-index: 3;
+        }
+
+        #minion-companion {
+            width: 50px;
+            position: absolute;
+            left: 5px;
+            bottom: 0;
+            z-index: 2;
+            transition: transform 0.4s;
+        }
+
+        #speech-bubble {
+            background: white;
+            border-radius: 15px;
+            padding: 8px;
+            position: absolute;
+            bottom: 100px;
+            left: 60px;
+            font-weight: bold;
+            color: #ff1a8c;
+            opacity: 0;
+            transition: opacity 0.3s;
+            width: 120px;
+            font-size: 14px;
+        }
+
+        /* Animations */
+        @keyframes intenseShake {
+            0%, 100% { transform: rotate(0deg); }
+            25% { transform: rotate(10deg); }
+            75% { transform: rotate(-10deg); }
+        }
+
+        @keyframes flicker {
+            from { opacity: 0.8; transform: scale(1); }
+            to { opacity: 1; transform: scale(1.1); }
+        }
+
+        /* Game Elements */
+        #cake-container {
+            width: 220px;
+            height: 200px;
+            background: rgba(255, 255, 255, 0.2);
+            display: flex;
+            flex-wrap: wrap-reverse;
+            justify-content: center;
+            gap: 5px;
+            margin-top: 20px;
+            border-radius: 10px;
+        }
     </style>
 </head>
 <body>
 
-    <audio id="bg-music" loop><source src="assets/rain-dance.mp3" type="audio/mpeg"></audio>
+    <audio id="bg-music" loop>
+        <source src="assets/rain-dance.mp3" type="audio/mpeg">
+    </audio>
 
     <div id="screen0" class="screen active">
-        <h2 style="color: #cc0066;">Tap to Open!</h2>
+        <h2 style="color: #cc0066; margin-bottom: 40px;">Tap to Open!</h2>
         <div id="starting-present" onclick="openPresent()">🎁</div>
     </div>
 
@@ -72,140 +295,197 @@
 
     <div id="screen1" class="screen">
         <h2 style="color: #cc0066;">I have a gift for you...</h2>
-        <button class="btn" onclick="startApp()">Open</button>
-        <button class="btn" style="background:#999" onclick="alert('Please open it! 🥺')">Not Open</button>
+        <div id="screen1-buttons">
+            <button class="btn" onclick="goToDashboard()">Open</button>
+            <button class="btn" style="background: #999;" onclick="alert('Please open it! 🥺')">Not Open</button>
+        </div>
     </div>
 
     <div id="screen2" class="screen">
+        <h2 style="color: #cc0066; margin-bottom: 30px;">Surprises for Alicia</h2>
         <div class="grid">
-            <div class="icon" id="opt1" onclick="openOpt(1)">🌸</div>
-            <div class="icon locked" id="opt2" onclick="openOpt(2)">📸</div>
-            <div class="icon locked" id="opt3" onclick="openOpt(3)">🎥</div>
-            <div class="icon locked" id="opt4" onclick="openOpt(4)">💌</div>
+            <div class="icon" id="opt1" onclick="viewOption(1)">🌸</div>
+            <div class="icon locked" id="opt2" onclick="viewOption(2)">📸</div>
+            <div class="icon locked" id="opt3" onclick="viewOption(3)">🎥</div>
+            <div class="icon locked" id="opt4" onclick="viewOption(4)">💌</div>
         </div>
-        <div class="icon" id="game-btn" style="display:none; margin-top:20px;" onclick="goToGame()">🍌</div>
+        <button id="game-btn" class="btn" style="display:none; margin-top:20px;" onclick="startGame()">🍌 Start Game</button>
     </div>
 
-    <div id="modal-1" class="option-modal"><button class="back-btn" onclick="closeOpt(1)">← Back</button><div id="bouquet" style="display:flex; flex-wrap:wrap; justify-content:center;"></div></div>
-    <div id="modal-2" class="option-modal"><button class="back-btn" onclick="closeOpt(2)">← Back</button><div id="album" style="position:relative;"></div></div>
-    <div id="modal-3" class="option-modal"><button class="back-btn" onclick="closeOpt(3)">← Back</button><video id="vid" width="80%" src="assets/minion-happy.mp4" controls></video></div>
-    <div id="modal-4" class="option-modal"><button class="back-btn" onclick="closeOpt(4)">← Back</button><div class="letter-paper"><h3>Dearest Alicia,</h3><p>Happy Birthday! I built this digital world just for you. Every banana and every line of code was written to make you smile. You are my favorite person, my best friend, and my safest place. I hope this year is as beautiful as your heart. ❤️</p></div></div>
+    <div id="modal-1" class="option-modal">
+        <button class="back-btn" onclick="closeModal(1)">← Back</button>
+        <h2 style="margin-bottom: 20px;">Your Flowers</h2>
+        <div id="bouquet-photos" class="bouquet-cluster"></div>
+    </div>
+
+    <div id="modal-2" class="option-modal">
+        <button class="back-btn" onclick="closeModal(2)">← Back</button>
+        <h2 style="margin-bottom: 20px;">Your 3D Album</h2>
+        <div class="book-wrapper">
+            <div class="book" id="album-book"></div>
+        </div>
+    </div>
+
+    <div id="modal-3" class="option-modal">
+        <button class="back-btn" onclick="closeModal(3)">← Back</button>
+        <video id="minion-vid" width="85%" src="assets/minion-happy.mp4" controls playsinline></video>
+    </div>
+
+    <div id="modal-4" class="option-modal">
+        <button class="back-btn" onclick="closeModal(4)">← Back</button>
+        <div class="letter-paper">
+            <h3>My Dearest Alicia,</h3>
+            <p>Happy Birthday, my beautiful girl! I wanted to build something uniquely yours. Every line of code was written to celebrate how much you mean to me. Applying my ICT skills for this has been my favorite project yet.</p>
+            <p>You are my best friend, my safest place, and my greatest adventure. I am so proud of you. Happy Birthday!</p>
+            <p style="text-align: right;">With all my love, Kevin ❤️</p>
+        </div>
+    </div>
 
     <div id="screen3" class="screen">
         <h2 style="color: #cc0066;">Collect 19 Bananas!</h2>
-        <div id="game-ui">
-            <div class="basket-container">
-                <img src="assets/minion-companion.png" class="minion-player">
-                <img src="assets/basket.png" class="basket" onerror="this.src='https://cdn-icons-png.flaticon.com/512/3081/3081986.png'">
-            </div>
-            <div id="thanks-msg">Thank you ❤️</div>
-        </div>
+        <div id="cake-container"></div>
     </div>
 
     <div id="screen4" class="screen">
-        <h1 id="finale-text" style="color:#ff1a8c; display:none;">Happy Birthday Alicia! 🥳🎉</h1>
-        <div class="cake">
-            <div class="layer layer-bottom"></div>
-            <div class="layer layer-middle"></div>
-            <div class="layer layer-top"><div class="candle"><div class="flame"></div></div></div>
+        <h1 id="finale-text" style="display:none; color:#ff1a8c;">Happy Birthday Alicia! 🥳🎉</h1>
+        <div style="width: 180px; height: 120px; background: #ff66b2; border-radius: 10px; position: relative;">
+            <div style="width: 8px; height: 35px; background: #fff; position: absolute; top: -35px; left: 50%; transform: translateX(-50%);">
+                <div class="flame" id="main-flame"></div>
+            </div>
         </div>
-        <p id="mic-hint" style="color:#cc0066; font-weight:bold; margin-top:20px;">Blow on your mic!</p>
+        <p id="mic-hint" style="color: #cc0066; font-weight: bold; margin-top: 20px;">Blow into your mic!</p>
     </div>
 
     <script>
-        let count = 0; let unlocked = 1; let viewed = [false, false, false, false];
-        
+        let bananasCollected = 0;
+        let unlocked = 1;
+        let viewed = [false, false, false, false];
+
         function openPresent() {
             document.getElementById('screen0').classList.remove('active');
             document.getElementById('screen1').classList.add('active');
         }
 
-        function startApp() {
-            document.getElementById('bg-music').play();
+        function goToDashboard() {
+            // Trigger background music
+            const music = document.getElementById('bg-music');
+            music.play().catch(e => console.log("Waiting for user interaction"));
+
             document.getElementById('screen1').classList.remove('active');
             document.getElementById('screen2').classList.add('active');
             document.getElementById('companion-area').style.display = 'flex';
         }
 
         function minionTalk(msg) {
-            let m = document.getElementById('minion-companion'), d = document.getElementById('door'), b = document.getElementById('speech-bubble');
-            d.style.transform = "rotateY(-110deg)";
+            const door = document.getElementById('door');
+            const minion = document.getElementById('minion-companion');
+            const bubble = document.getElementById('speech-bubble');
+
+            door.style.transform = "rotateY(-110deg)";
             setTimeout(() => {
-                m.style.transform = "translateX(60px)";
-                b.innerText = msg; b.style.opacity = 1;
+                minion.style.transform = "translateX(60px)";
+                bubble.innerText = msg;
+                bubble.style.opacity = 1;
                 setTimeout(() => {
-                    b.style.opacity = 0; m.style.transform = "translateX(0)";
-                    setTimeout(() => { d.style.transform = "rotateY(0)"; }, 400);
+                    bubble.style.opacity = 0;
+                    minion.style.transform = "translateX(0)";
+                    setTimeout(() => door.style.transform = "rotateY(0)", 400);
                 }, 2500);
             }, 300);
         }
 
-        function openOpt(n) {
-            document.getElementById('modal-'+n).style.display = 'flex';
-            if(n===1) {
-                let bouq = document.getElementById('bouquet'); bouq.innerHTML = '';
-                for(let i=1; i<=10; i++) bouq.innerHTML += `<div class="flower-pic" style="background-image:url('assets/pic${i}.jpg')"></div>`;
+        function viewOption(n) {
+            document.getElementById('modal-' + n).style.display = 'flex';
+            if (n === 1) {
+                const bouq = document.getElementById('bouquet-photos');
+                bouq.innerHTML = '';
+                for (let i = 1; i <= 10; i++) {
+                    bouq.innerHTML += `<div class="flower-pic" style="background-image:url('assets/pic${i}.jpg')"></div>`;
+                }
             }
-            if(n===2) {
-                let alb = document.getElementById('album'); alb.innerHTML = '<h4>(Click to flip 9 photos)</h4>';
-                for(let i=1; i<=9; i++) alb.innerHTML += `<img src="assets/album${i}.jpg" style="width:200px; display:block; margin:10px auto;">`;
+            if (n === 2) {
+                const alb = document.getElementById('album-book');
+                alb.innerHTML = '';
+                for (let i = 1; i <= 9; i++) {
+                    const p = document.createElement('div');
+                    p.className = 'page';
+                    p.style.zIndex = 10 - i;
+                    p.onclick = function() { this.classList.toggle('turned'); };
+                    p.innerHTML = `
+                        <div class="page-front"><img src="assets/album${i}.jpg"></div>
+                        <div class="page-back" style="display:flex; align-items:center; justify-content:center; font-size:40px;">❤️</div>
+                    `;
+                    alb.appendChild(p);
+                }
             }
-            if(n===3) document.getElementById('vid').play();
-            viewed[n-1] = true;
+            if (n === 3) document.getElementById('minion-vid').play();
         }
 
-        function closeOpt(n) {
-            document.getElementById('modal-'+n).style.display = 'none';
-            if(n===3) document.getElementById('vid').pause();
-            
-            let msgs = ["You look great! 😍", "Nice memories!", "Haha, watch again?", "That's so sweet!"];
-            minionTalk(msgs[n-1]);
+        function closeModal(n) {
+            document.getElementById('modal-' + n).style.display = 'none';
+            if (n === 3) document.getElementById('minion-vid').pause();
 
-            if(n < 4) {
+            viewed[n - 1] = true;
+            minionTalk(["Bello Alicia! 😍", "Look at us!", "Watch Minion! 🍌", "Read letter!"][n - 1]);
+
+            if (n < 4) {
                 unlocked = n + 1;
-                document.getElementById('opt'+unlocked).classList.remove('locked');
+                document.getElementById('opt' + unlocked).classList.remove('locked');
             }
-            if(viewed.every(v => v)) document.getElementById('game-btn').style.display = 'flex';
+            if (viewed.every(v => v)) {
+                document.getElementById('game-btn').style.display = 'block';
+            }
         }
 
-        function goToGame() {
+        function startGame() {
             document.getElementById('screen2').classList.remove('active');
             document.getElementById('screen3').classList.add('active');
             spawnBananas();
         }
 
         function spawnBananas() {
-            let iv = setInterval(() => {
-                if(count >= 19) { clearInterval(iv); document.getElementById('thanks-msg').style.display = 'block'; setTimeout(goFinale, 2000); return; }
-                let b = document.createElement('div'); b.className = 'banana'; b.innerText = '🍌';
-                b.style.left = Math.random() * 80 + 'vw'; b.style.top = "-50px";
+            const iv = setInterval(() => {
+                if (bananasCollected >= 19) {
+                    clearInterval(iv);
+                    setTimeout(() => {
+                        document.getElementById('screen3').classList.remove('active');
+                        document.getElementById('screen4').classList.add('active');
+                        listenToMic();
+                    }, 1500);
+                    return;
+                }
+                const b = document.createElement('div');
+                b.innerText = '🍌';
+                b.style.position = 'absolute';
+                b.style.fontSize = '50px';
+                b.style.left = Math.random() * 80 + 'vw';
+                b.style.top = '-50px';
+                b.style.cursor = 'pointer';
                 document.getElementById('screen3').appendChild(b);
-                
-                b.animate([{ top: '-50px' }, { top: '80vh' }], { duration: 4000 });
+
+                const fall = b.animate([{ top: '-50px' }, { top: '80vh' }], { duration: 4000 });
                 b.onclick = () => {
-                    count++;
-                    b.style.transition = "all 0.6s";
-                    b.style.left = "50vw"; b.style.top = "80vh"; b.style.opacity = 0;
-                    setTimeout(() => b.remove(), 600);
+                    bananasCollected++;
+                    const s = document.createElement('div');
+                    s.innerText = '🍌';
+                    s.style.fontSize = '25px';
+                    document.getElementById('cake-container').appendChild(s);
+                    b.remove();
                 };
+                fall.onfinish = () => { if (b.parentNode) b.remove(); };
             }, 1000);
         }
 
-        function goFinale() {
-            document.getElementById('screen3').classList.remove('active');
-            document.getElementById('screen4').classList.add('active');
-            startMic();
-        }
-
-        async function startMic() {
+        async function listenToMic() {
             try {
                 const s = await navigator.mediaDevices.getUserMedia({ audio: true });
                 const ctx = new AudioContext(), ana = ctx.createAnalyser(), src = ctx.createMediaStreamSource(s);
-                src.connect(ana); ana.fftSize = 256; const buf = new Uint8Array(ana.frequencyBinCount);
-                function check() {
+                src.connect(ana); ana.fftSize = 256;
+                const buf = new Uint8Array(ana.frequencyBinCount);
+                function ck() {
                     ana.getByteFrequencyData(buf);
-                    if(buf.reduce((a,b)=>a+b)/buf.length > 60) {
-                        document.querySelector('.flame').style.display = 'none';
+                    if (buf.reduce((a, b) => a + b) / buf.length > 60) {
+                        document.getElementById('main-flame').style.display = 'none';
                         document.getElementById('finale-text').style.display = 'block';
                         document.getElementById('mic-hint').style.display = 'none';
                         let end = Date.now() + 30000;
@@ -214,10 +494,9 @@
                             confetti({ particleCount: 3, angle: 120, spread: 55, origin: { x: 1 } });
                             if (Date.now() < end) requestAnimationFrame(frame);
                         }());
-                    } else requestAnimationFrame(check);
-                }
-                check();
-            } catch(e) {}
+                    } else requestAnimationFrame(ck);
+                } ck();
+            } catch (e) { alert("Mic required to blow candles!"); }
         }
     </script>
 </body>
