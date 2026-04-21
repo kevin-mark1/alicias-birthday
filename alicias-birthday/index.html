@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Happy Birthday Alicia!</title>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <style>
+        /* Base Styling */
+        body { font-family: Arial, sans-serif; text-align: center; background: #ffb6c1; margin: 0; overflow: hidden; }
+        .screen { display: none; height: 100vh; width: 100vw; flex-direction: column; justify-content: center; align-items: center; }
+        .active { display: flex; }
+        .btn { padding: 15px 30px; margin: 10px; font-size: 18px; border: none; border-radius: 10px; cursor: pointer; background: #ff1a8c; color: white; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .grid { display: flex; gap: 20px; flex-wrap: wrap; justify-content: center; z-index: 10; position: relative; }
+        
+        /* Shaking Present Box */
+        #starting-present { font-size: 100px; cursor: pointer; animation: intenseShake 1.5s infinite; z-index: 50; }
+        
+        /* Options */
+        .icon { width: 80px; height: 80px; background: #ff69b4; border-radius: 15px; display: flex; align-items: center; justify-content: center; font-size: 30px; cursor: pointer; transition: transform 0.3s, opacity 0.3s; box-shadow: 0 4px 6px rgba(0,0,0,0.1); color: white; z-index: 10; position: relative; }
+        .locked { opacity: 0.4; filter: grayscale(100%); cursor: not-allowed; pointer-events: none; box-shadow: none; background: #999; }
+        .viewed { transform: scale(0.95) !important; opacity: 0.8; }
+        
+        /* Unlock & Active Shaking Animations */
+        .unlock-anim { animation: unlockPop 0.6s ease-out forwards; }
+        .shaking-option { animation: mildShake 2s infinite; }
+
+        /* Full-Screen Option Modals */
+        .option-modal { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.9); z-index: 200; flex-direction: column; justify-content: center; align-items: center; color: white; }
+        
+        /* Universal Back Button at Top Left */
+        .back-btn { position: absolute; top: 20px; left: 20px; background: rgba(255, 255, 255, 0.2); border: 2px solid white; color: white; border-radius: 20px; padding: 8px 15px; font-size: 16px; cursor: pointer; z-index: 300; font-weight: bold; backdrop-filter: blur(5px); }
+        .back-btn:hover { background: rgba(255, 255, 255, 0.4); }
+
+        /* Bouquet Specifics */
+        .bouquet-cluster { display: flex; flex-wrap: wrap; justify-content: center; width: 320px; position: relative; z-index: 2; padding: 10px; }
+        .flower-pic { width: 50px; height: 50px; background: #fff; border: 3px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.5); margin: -5px; border-radius: 8px; background-size: cover; background-position: center; }
+        .stem-container { width: 60px; height: 120px; background: #228B22; margin: -20px auto 0 auto; border-radius: 0 0 30px 30px; position: relative; z-index: 1; display: flex; justify-content: center; align-items: center; box-shadow: inset 5px 0 10px rgba(0,0,0,0.2); }
+        .bow { width: 80px; height: 20px; background: #ff1a8c; position: absolute; top: 20px; border-radius: 10px; }
+
+        /* Minion Companion UI */
+        #companion-area { position: fixed; bottom: 0; left: 10px; z-index: 100; display: none; align-items: flex-end; height: 120px; width: 150px; }
+        #door { width: 60px; height: 90px; background: #8B4513; border: 3px solid #5C2E0B; border-bottom: none; border-radius: 10px 10px 0 0; position: absolute; bottom: 0; left: 0; z-index: 3; }
+        #door::after { content: ''; position: absolute; right: 8px; top: 45px; width: 10px; height: 10px; background: #FFD700; border-radius: 50%; box-shadow: inset -2px -2px 4px rgba(0,0,0,0.3); }
+        #minion-companion { width: 50px; position: absolute; left: 5px; bottom: 0; z-index: 2; transition: transform 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        .pop-out { transform: translateX(65px); }
+        #speech-bubble { background: white; border-radius: 15px; padding: 8px 15px; position: absolute; bottom: 65px; left: 75px; font-weight: bold; color: #ff1a8c; opacity: 0; transition: opacity 0.3s; z-index: 4; box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
+        #speech-bubble::after { content: ''; position: absolute; bottom: -8px; left: 15px; border-width: 8px 8px 0; border-style: solid; border-color: white transparent transparent transparent; }
+        .show-bubble { opacity: 1 !important; }
+        #minion-heart { position: absolute; bottom: 20px; left: 80px; font-size: 40px; opacity: 0; transition: opacity 1s, transform 1s; z-index: 5; pointer-events: none; }
+        .show-heart { opacity: 1 !important; transform: translateY(-60px) scale(1.5); }
+
+        /* Game Elements */
+        #fifth-icon { display: none; background: #ff3333; animation: pulse 1s infinite; margin-top: 20px; z-index: 10; position: relative; }
+        #cake-container { width: 200px; height: 200px; background: rgba(255, 255, 255, 0.5); margin-top: 20px; display: flex; flex-direction: column; justify-content: flex-end; border-radius: 10px; z-index: 10; position: relative; }
+        .cake-piece { width: 100%; background: #ff66b2; border-top: 2px solid #fff; transition: height 0.3s; }
+        .balloon { position: absolute; bottom: -50px; font-size: 40px; cursor: pointer; animation: floatUp 5s linear infinite; z-index: 20; }
+        #finale-text { display: none; position: absolute; top: 10%; font-size: 40px; font-weight: bold; color: #ff007f; animation: dropDown 1s forwards; text-shadow: 2px 2px 4px rgba(255,255,255,0.7); z-index: 10; }
+        #signature { display: none; position: absolute; bottom: 10%; right: 10%; font-size: 30px; color: #cc0066; animation: fadeIn 2s forwards; font-style: italic; z-index: 10; }
+        
+        /* Keyframes */
+        @keyframes floatUp { to { bottom: 110vh; } }
+        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.1); } 100% { transform: scale(1); } }
+        @keyframes dropDown { from { top: -50px; } to { top: 10%; } }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes intenseShake { 0%, 100% { transform: rotate(0deg); } 25% { transform: rotate(10deg) scale(1.1); } 75% { transform: rotate(-10deg) scale(1.1); } }
+        @keyframes mildShake { 0%, 100% { transform: rotate(0deg); } 10% { transform: rotate(8deg); } 20% { transform: rotate(-8deg); } 30% { transform: rotate(0deg); } }
+        @keyframes unlockPop { 
+            0% { transform: scale(1); filter: grayscale(100%); background: #999; } 
+            50% { transform: scale(1.2); filter: grayscale(0%); background: #fff; box-shadow: 0 0 15px #fff; } 
+            100% { transform: scale(1); filter: grayscale(0%); background: #ff69b4; } 
+        }
+    </style>
+</head>
+<body>
+
+    <audio id="bg-music" loop>
+        <source src="assets/rain-dance.mp3" type="audio/mpeg">
+    </audio>
+
+    <div id="screen0" class="screen active">
+        <h2 style="color: #cc0066; margin-bottom: 40px;">Tap to Open!</h2>
+        <div id="starting-present" onclick="openInitialPresent()">🎁</div>
+    </div>
+
+    <div id="companion-area">
+        <div id="door"></div>
+        <img id="minion-companion" src="assets/minion-companion.png" alt="Minion">
+        <div id="speech-bubble">Yayyy!</div>
+        <div id="minion-heart">❤️</div>
+    </div>
+
+    <div id="screen1" class="screen">
+        <button id="screen1-back-btn" class="back-btn" onclick="resetScreen1()" style="display: none; color: #cc0066; border-color: #cc0066; background: rgba(255,255,255,0.5);">← Back</button>
+        
+        <h2 style="color: #cc0066;">I have a gift for you...</h2>
+        
+        <div id="screen1-buttons" style="z-index: 10; position: relative;">
+            <button class="btn" onclick="goToDashboard()">Open</button>
+            <button class="btn" style="background: #999;" onclick="doNotOpen()">Not Open</button>
+        </div>
+        
+        <div id="sad-minion-container" style="display:none; margin-top: 20px; z-index: 10; position: relative;">
+            <img src="assets/minion-sad.jpg" alt="Sad Minion" width="200" style="border-radius: 10px;">
+            <h3 style="color: #cc0066;">Please open the gift 🥺</h3>
+        </div>
+    </div>
+
+    <div id="screen2" class="screen">
+        <h2 style="color: #cc0066; z-index: 10; position: relative;">Unlock your surprises step by step</h2>
+        <div class="grid">
+            <div class="icon" id="opt1" onclick="viewOption(1)">🌸</div>
+            <div class="icon locked" id="opt2" onclick="viewOption(2)">📸</div>
+            <div class="icon locked" id="opt3" onclick="viewOption(3)">🎥</div>
+            <div class="icon locked" id="opt4" onclick="viewOption(4)">💌</div>
+        </div>
+        <div style="display: flex; justify-content: center; width: 100%;">
+            <div class="icon" id="fifth-icon" onclick="startBalloonGame()">🎈</div>
+        </div>
+    </div>
+
+    <div id="modal-1" class="option-modal">
+        <button class="back-btn" onclick="closeModal(1)">← Back</button>
+        <h2 style="margin-bottom: 20px;">Your Beautiful Flowers!</h2>
+        <div id="bouquet-photos" class="bouquet-cluster"></div>
+        <div class="stem-container">
+            <div class="bow"></div>
+        </div>
+    </div>
+
+    <div id="modal-2" class="option-modal">
+        <button class="back-btn" onclick="closeModal(2)">← Back</button>
+        <h2>Your Photo Album</h2>
+        <p>[We will build the 10-picture layout here next!]</p>
+    </div>
+
+    <div id="modal-3" class="option-modal">
+        <button class="back-btn" onclick="closeModal(3)">← Back</button>
+        <h2>A Special Message</h2>
+        <p>[Minion Video will play here]</p>
+    </div>
+
+    <div id="modal-4" class="option-modal">
+        <button class="back-btn" onclick="closeModal(4)">← Back</button>
+        <h2>My Letter to You</h2>
+        <p>[Your beautiful letter will go here]</p>
+    </div>
+
+    <div id="screen3" class="screen">
+        <h2 style="color: #cc0066; z-index: 10; position: relative;">Pop 19 Balloons to Build Your Cake!</h2>
+        <div id="cake-container"></div>
+    </div>
+
+    <div id="screen4" class="screen">
+        <h1 id="finale-text">Happy Birthday!</h1>
+        <div style="font-size: 50px; font-weight: bold; color: #ff1a8c; margin-bottom: 5px; z-index: 10; position: relative;">A L I C I A 🕯️</div>
+        <div style="width: 220px; height: 120px; background: #ff66b2; border-radius: 10px; border-bottom: 10px solid #cc0066; z-index: 10; position: relative;"></div>
+        <p id="mic-instruction" style="color: #cc0066; font-weight: bold; margin-top: 20px; z-index: 10; position: relative;">Blow into your microphone to put out the candles!</p>
+        <h2 id="signature">from Kevin ❤️</h2>
+    </div>
+
+    <script>
+        let unlocked = { 1: true, 2: false, 3: false, 4: false }; 
+        let viewed = { 1: false, 2: false, 3: false, 4: false };   
+        let balloonsPopped = 0;
+
+        function openInitialPresent() {
+            for(let i=0; i<10; i++) {
+                let balloon = document.createElement('div');
+                balloon.className = 'balloon';
+                balloon.innerText = '🎈';
+                balloon.style.left = Math.random() * 90 + 'vw';
+                balloon.style.animationDuration = (Math.random() * 2 + 3) + 's';
+                document.body.appendChild(balloon);
+                setTimeout(() => balloon.remove(), 5000);
+            }
+            document.getElementById('screen0').classList.remove('active');
+            document.getElementById('screen1').classList.add('active');
+        }
+
+        function triggerYay() {
+            let minion = document.getElementById('minion-companion');
+            let bubble = document.getElementById('speech-bubble');
+            minion.classList.add('pop-out');
+            setTimeout(() => { bubble.classList.add('show-bubble'); }, 500);
+            setTimeout(() => {
+                bubble.classList.remove('show-bubble');
+                setTimeout(() => { minion.classList.remove('pop-out'); }, 300);
+            }, 3000);
+        }
+
+        function triggerHeart() {
+            let minion = document.getElementById('minion-companion');
+            let heart = document.getElementById('minion-heart');
+            minion.classList.add('pop-out');
+            setTimeout(() => { heart.classList.add('show-heart'); }, 800);
+        }
+
+        // --- New Logic for the "Not Open" loop ---
+        function doNotOpen() {
+            document.getElementById('screen1-buttons').style.display = 'none';
+            document.getElementById('sad-minion-container').style.display = 'block';
+            document.getElementById('screen1-back-btn').style.display = 'block';
+        }
+
+        function resetScreen1() {
+            document.getElementById('screen1-buttons').style.display = 'block';
+            document.getElementById('sad-minion-container').style.display = 'none';
+            document.getElementById('screen1-back-btn').style.display = 'none';
+        }
+        // ------------------------------------------
+
+        function goToDashboard() {
+            let music = document.getElementById('bg-music');
+            music.volume = 0.2; 
+            music.play().catch(e => console.log("Audio blocked."));
+
+            document.getElementById('screen1').classList.remove('active');
+            document.getElementById('screen2').classList.add('active');
+            document.getElementById('companion-area').style.display = 'flex';
+            document.getElementById('opt1').classList.add('shaking-option');
+        }
+
+        function buildBouquet() {
+            let container = document.getElementById('bouquet-photos');
+            container.innerHTML = ''; 
+            for(let i=1; i<=20; i++) {
+                let rotation = -20 + (Math.random() * 40); 
+                container.innerHTML += `<div class="flower-pic" style="background-image: url('assets/pic${i}.jpg'); transform: rotate(${rotation}deg);"></div>`;
+            }
+        }
+
+        function closeModal(num) {
+            document.getElementById('modal-' + num).style.display = 'none';
+        }
+
+        function viewOption(num) {
+            if (!unlocked[num]) return;
+
+            document.getElementById('opt' + num).classList.remove('shaking-option');
+
+            viewed[num] = true;
+            document.getElementById('opt' + num).classList.add('viewed');
+            triggerYay();
+
+            setTimeout(() => {
+                if(num === 1) buildBouquet();
+                document.getElementById('modal-' + num).style.display = 'flex';
+
+                let nextNum = num + 1;
+                if (nextNum <= 4 && !unlocked[nextNum]) {
+                    unlocked[nextNum] = true;
+                    let nextBtn = document.getElementById('opt' + nextNum);
+                    nextBtn.classList.remove('locked');
+                    nextBtn.classList.add('unlock-anim');
+                    
+                    setTimeout(() => {
+                        nextBtn.classList.remove('unlock-anim');
+                        nextBtn.classList.add('shaking-option');
+                    }, 600); 
+                }
+
+                if (viewed[1] && viewed[2] && viewed[3] && viewed[4]) {
+                    document.getElementById('fifth-icon').style.display = 'flex';
+                }
+            }, 100); 
+        }
+
+        function startBalloonGame() {
+            document.getElementById('screen2').classList.remove('active');
+            document.getElementById('screen3').classList.add('active');
+            spawnBalloons();
+        }
+
+        function spawnBalloons() {
+            let gameArea = document.getElementById('screen3');
+            let interval = setInterval(() => {
+                if (balloonsPopped >= 19) {
+                    clearInterval(interval);
+                    return;
+                }
+                let balloon = document.createElement('div');
+                balloon.className = 'balloon';
+                balloon.innerText = '🎈';
+                balloon.style.left = Math.random() * 80 + 'vw';
+                
+                balloon.onclick = function() {
+                    this.remove();
+                    balloonsPopped++;
+                    buildCake();
+                    if (balloonsPopped === 19) setTimeout(startFinale, 1000);
+                };
+                gameArea.appendChild(balloon);
+            }, 800);
+        }
+
+        function buildCake() {
+            let cakeDiv = document.getElementById('cake-container');
+            let piece = document.createElement('div');
+            piece.className = 'cake-piece';
+            piece.style.height = (100 / 19) + '%';
+            cakeDiv.appendChild(piece);
+        }
+
+        function startFinale() {
+            document.getElementById('screen3').classList.remove('active');
+            document.getElementById('screen4').classList.add('active');
+            listenToMicrophone();
+        }
+
+        async function listenToMicrophone() {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                const analyzer = audioContext.createAnalyser();
+                const microphone = audioContext.createMediaStreamSource(stream);
+                microphone.connect(analyzer);
+                analyzer.fftSize = 256;
+                const bufferLength = analyzer.frequencyBinCount;
+                const dataArray = new Uint8Array(bufferLength);
+
+                function checkVolume() {
+                    analyzer.getByteFrequencyData(dataArray);
+                    let sum = 0;
+                    for(let i = 0; i < bufferLength; i++) { sum += dataArray[i]; }
+                    let average = sum / bufferLength;
+
+                    if (average > 80) { 
+                        triggerWin();
+                        stream.getTracks().forEach(track => track.stop()); 
+                    } else {
+                        requestAnimationFrame(checkVolume);
+                    }
+                }
+                checkVolume();
+            } catch (err) {
+                alert("Please allow microphone access so you can blow out the candles!");
+            }
+        }
+
+        function triggerWin() {
+            document.getElementById('mic-instruction').style.display = 'none'; 
+            document.getElementById('finale-text').style.display = 'block';
+            document.getElementById('signature').style.display = 'block';
+            
+            confetti({ particleCount: 150, spread: 70, origin: { x: 0, y: 0.6 } }); 
+            confetti({ particleCount: 150, spread: 70, origin: { x: 1, y: 0.6 } }); 
+            
+            triggerHeart();
+        }
+    </script>
+</body>
+</html>
